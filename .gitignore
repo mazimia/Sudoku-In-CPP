@@ -1,0 +1,22 @@
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+.idea/
+.vs/
+out/
+x64/
+CMakeLists.txt
+cmake-build-debug/
+.DS_Store
+errors.txt
+student_output*.txt
+correct_output?.txt
+correct_output??.txt
+*.dSYM/
+w?p?-*.py
+w?p?*.txt
+Unit Tests/
+main_prof.cpp
+ws
+diff.txt
