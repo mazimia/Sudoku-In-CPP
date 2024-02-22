@@ -1,0 +1,32 @@
+{
+    "folders":
+    [
+        {
+            "path": "~/Documents/Projects/Sudoku-In-C++/"
+        }
+    ],
+    "settings":
+    {
+        "tab_size": 4,
+        "translate_tabs_to_spaces": true,
+        "syntax": "Packages/C++/C++.sublime-syntax"
+    },
+    "build_systems":
+    [
+        {
+            "name": "CMake",
+            "working_dir": "${project_path}",
+            "shell_cmd": "cmake --build . --target all -- -j 4",
+            "variants": [
+                {
+                    "name": "Clean",
+                    "shell_cmd": "cmake --build . --target clean"
+                },
+                {
+                    "name": "Debug",
+                    "shell_cmd": "cmake --build . --target all --config Debug -- -j 4"
+                }
+            ]
+        }
+    ]
+}
