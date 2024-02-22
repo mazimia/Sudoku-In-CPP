@@ -18,6 +18,24 @@ namespace sudoku {
 		void emptyNumbers();
 		/// Counts how many numbers are available in cell
 		int countNumbers(int row, int column) const;
+		/// Shuffles all the available numbers
+		void shuffler();
+		
+		/// Sets a cell
+		void setCell(int row, int column, int value, bool set);
+
+		/// Update board state
+		void update(int row, int column, int value, bool set);
+		/// Updates the columns in possibleNum
+		void updateColumn(int row, int column, int value, bool set);
+		/// Updates the remaining rows in possibleNum
+		void updateRow(int row, int column, int value, bool set);
+		/// Updates the 3x3 square 
+		void updateSquare(int row, int column, int value, bool set);
+		
+		/// Returns the square index based on column and row
+		int locateSquare(int row, int column);
+		
 	public:
 		sudokuBoard();
 		~sudokuBoard();

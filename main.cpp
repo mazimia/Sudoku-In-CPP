@@ -7,5 +7,6 @@ using namespace sudoku;
 int main() {
     sudokuBoard A;
     A.displayDebug();
+    A.generate();
     return 0;
 }

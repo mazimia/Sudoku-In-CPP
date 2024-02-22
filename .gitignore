@@ -20,3 +20,6 @@ Unit Tests/
 main_prof.cpp
 ws
 diff.txt
+*.sublime-project
+*.sublime-workspace
+
