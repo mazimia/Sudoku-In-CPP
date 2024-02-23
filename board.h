@@ -7,10 +7,14 @@
 namespace sudoku {
 	class sudokuBoard {
 		int board[9][9] {};
-		int* numbers[];
+		int* numbers;
 		int numbersSize;
 		int numBase[9] NUM;
 		bool possibleNum[9][9][9] = {{{true}}};
+
+        /////////////////////////
+        // Number Manipulation //
+        /////////////////////////
 
 		/// Goes through possibleNum and creates a list of possible numbers for that cell
 		void createNumbers(int row, int column);
@@ -20,9 +24,13 @@ namespace sudoku {
 		int countNumbers(int row, int column) const;
 		/// Shuffles all the available numbers
 		void shuffler();
-		
+
+        ////////////////////////
+        // Board Manipulation //
+        ////////////////////////
+
 		/// Sets a cell
-		void setCell(int row, int column, int value, bool set);
+		void setCell(int row, int column, bool set);
 
 		/// Update board state
 		void update(int row, int column, int value, bool set);
@@ -35,14 +43,28 @@ namespace sudoku {
 		
 		/// Returns the square index based on column and row
 		int locateSquare(int row, int column);
-		
+
+        ///////////////////////
+        // Display Functions //
+        ///////////////////////
+
+        std::ostream& displayHeader(std::ostream& os) const;
+        std::ostream& displayCell(std::ostream& os, int value) const;
+        std::ostream& displaySeparator(std::ostream& os, int j) const;
+        std::ostream& displayHorizontalSeparator(std::ostream& os, int i) const;
+        std::ostream& displayFooter(std::ostream& os) const;
+
 	public:
 		sudokuBoard();
 		~sudokuBoard();
 		/// Display function to print the grid and return the ostream object
-    	std::ostream& displayDebug(std::ostream& os = std::cout) const;
+        std::ostream& display(std::ostream& os = std::cout) const;
+        /// Debug display
+        void displayDebug(int row = -1, int column = -1, int state = 0) const;
     	/// Generate a new board
     	void generate();
 		
 	};
 }
+
+#endif

@@ -3,26 +3,36 @@
 #include <random>
 #include "board.h"
 
+using namespace sudoku;
 namespace sudoku {
+
     sudokuBoard::sudokuBoard() : numbers(nullptr), numbersSize(9) {
+        for (int i = 0; i < 9; ++i) {
+            for (int j = 0; j < 9; ++j) {
+                for (int k = 0; k < 9; ++k) {
+                    possibleNum[i][j][k] = true;
+                }
+            }
+        }
     }
 
     sudokuBoard::~sudokuBoard() {
         emptyNumbers();
     }
 
-    sudokuBoard::emptyNumbers() {
+    void sudokuBoard::emptyNumbers() {
         if (numbers != nullptr) {
             delete[] numbers;
+            numbers = nullptr;
         }
         numbersSize = 0;
     }
 
-    sudokuBoard::createNumbers(int row, int column) {
+    void sudokuBoard::createNumbers(int row, int column) {
         int counter = 0;
         emptyNumbers();
         // generate numbers array
-        numbersSize = countNumbers();
+        numbersSize = countNumbers(row, column);
         numbers = new int[numbersSize];
         // loop through possible numbers and fill numbers array
         for (int i = 0; i < 9; i++) {
@@ -33,7 +43,7 @@ namespace sudoku {
         }
     }
 
-    sudokuBoard::int countNumbers(int row, int column) const {
+    int sudokuBoard::countNumbers(int row, int column) const {
         int counter = 0;
         for (int i = 0; i < 9; i++) {
             if(possibleNum[row][column][i]) {
@@ -43,7 +53,7 @@ namespace sudoku {
         return counter;
     }
 
-    sudokuBoard::void shuffler() {
+    void sudokuBoard::shuffler() {
         std::random_device rd;
         std::mt19937 gen(rd());
 
@@ -57,55 +67,62 @@ namespace sudoku {
         }
     }
 
-    sudokuBoard::void generate() {
+    void sudokuBoard::generate() {
         for (int i = 0; i < 9; i++) {
             for (int j = 0; j < 9; j++) {
                 setCell(i, j, true);
-                update(i, j, board[i][j], false);
-                displayDebug();
+                //update(i, j, board[i][j], false);
+                //displayDebug();
             }
         }
     }
 
-    sudokuBoard::void setCell(int row, int column, bool set) {
-        createNumbers(row, column);
-        shuffler();
-        board[row][column] = numbers[0];
+    void sudokuBoard::setCell(int row, int column, bool set) {
+        // forward track mode
+        if (set) {
+            createNumbers(row, column);
+            if (numbersSize > 0) {
+                if (numbersSize != 1) {
+                    shuffler();
+                }
+
+                board[row][column] = numbers[0];
+                displayDebug(row, column, 1);
+                update(row, column, board[row][column], !set);
+            } else {
+                setCell(row, column - 1, false);
+                displayDebug(row, column, 2);
+            }
+        }
+
+        // backtrack mode
+        else {
+            update(row, column, board[row][column], !set);
+            board[row][column] = 0;
+            displayDebug(row, column, 3);
+            setCell(row, column, !set);
+        }
     }
 
-    /*
-    sudokuBoard::bool canCol(int column, int value) {
-        return possibleNum[0][column][value - 1];
-    }
-
-    sudokuBoard::bool canRow(int row, int value) {
-        return possibleNum[row][0][value - 1];
-    }
-
-    sudokuBoard::bool canSquare(int row, int column, int value) {
-        return possibleNum[row][column][value - 1];
-    }
-    */
-
-    sudokuBoard::void update(int row, int column, int value, bool set) {
+    void sudokuBoard::update(int row, int column, int value, bool set) {
         updateColumn(row, column, value, set);
         updateRow(row, column, value, set);
         updateSquare(row, column, value, set);
     }
     
-    sudokuBoard::void updateColumn(int row, int column, int value, bool set) {
+    void sudokuBoard::updateColumn(int row, int column, int value, bool set) {
         for (int i = 0; i < 9; i++) {
             possibleNum[i][column][value - 1] = set;
         }
     }
 
-    sudokuBoard::void updateRow(int row, int column, int value, bool set) {
+    void sudokuBoard::updateRow(int row, int column, int value, bool set) {
         for (int i = 0; i < 9; i++) {
             possibleNum[row][i][value - 1] = set;
         }
     }
 
-    sudokuBoard::void updateSquare(int row, int column, int value, bool set) {
+    void sudokuBoard::updateSquare(int row, int column, int value, bool set) {
         int startRow = (row/3) * 3;
         int startColumn = (column/3) * 3;
         for (int i = 0; i < 3; i++) {
@@ -115,7 +132,7 @@ namespace sudoku {
         }
     }
 
-    sudokuBoard::int locateSquare(int row, int column) {
+    int sudokuBoard::locateSquare(int row, int column) {
         /// square-row 1
         if (row < 3) {
             /// square-column 1
@@ -145,46 +162,132 @@ namespace sudoku {
         }
     }
 
-    sudokuBoard::std::ostream& displayDebug(std::ostream& os = std::cout) const {
+    ///////////////////////
+    // Display Functions //
+    ///////////////////////
+
+    std::ostream& sudokuBoard::displayHeader(std::ostream& os) const {
         // Print top border
-        os << "||===|===|===||===|===|===||===|===|===||" << std::endl;
+        os << "∥===|===|===∥===|===|===∥===|===|===∥" << std::endl;
+        return os;
+    }
+
+    std::ostream& sudokuBoard::displayCell(std::ostream& os, int value) const {
+        // Print board element or empty space if the value is 0
+        if (value == 0) os << " ";
+        else os << value;
+        return os;
+    }
+
+    std::ostream& sudokuBoard::displaySeparator(std::ostream& os, int j) const {
+        // Print vertical border after each cell
+        if ((j + 1) % 3 == 0 && j != 8) os << " ∥ ";
+        else if (j != 8) os << " | ";
+        return os;
+    }
+
+    std::ostream& sudokuBoard::displayHorizontalSeparator(std::ostream& os, int i) const {
+        // Print horizontal border after every 3rd row
+        if ((i + 1) % 3 == 0 && i != 8) {
+            os << "∥---|---|---∥---|---|---∥---|---|---∥" << std::endl;
+        }
+        return os;
+    }
+
+    std::ostream& sudokuBoard::displayFooter(std::ostream& os) const {
+        // Print bottom border
+        os << "∥===|===|===∥===|===|===∥===|===|===∥\n\n" << std::endl;
+        return os;
+    }
+
+    std::ostream& sudokuBoard::display(std::ostream& os) const {
+        displayHeader(os);
 
         // Iterate over each row
         for (int i = 0; i < 9; ++i) {
             // Print vertical border for the left side of the grid
-            os << "|| ";
+            os << "∥ ";
+
+            // Iterate over each column
+            for (int j = 0; j < 9; ++j) {
+                displayCell(os, board[i][j]);
+                displaySeparator(os, j);
+            }
+
+            // Print vertical border for the right side of the grid
+            os << " ∥";
+            os << std::endl;
+
+            // Print horizontal border after every 3rd row
+            displayHorizontalSeparator(os, i);
+        }
+
+        displayFooter(os);
+
+        // Return the ostream object
+        return os;
+    }
+
+    void sudokuBoard::displayDebug(int row, int column, int state) const {
+        switch (state) {
+            case 1:
+                std::cout << row << "," << column << " Set Successfully" << std::endl;
+                break;
+            case 2:
+                std::cout << row << "," << column << " Backtracking started" << std::endl;
+                break;
+            case 3:
+                std::cout << row << "," << column << " Reset state" << std::endl;
+                break;
+            default:
+                break;
+        }
+        // Print top border
+        std::cout << "    1   2   3   4   5   6   7   8   9" << std::endl;
+        std::cout << "  ∥===|===|===∥===|===|===∥===|===|===∥" << std::endl;
+
+        // Iterate over each row
+        for (int i = 0; i < 9; ++i) {
+            // Print vertical border for the left side of the grid
+            std::cout << i + 1 << " ∥ ";
 
             // Iterate over each column
             for (int j = 0; j < 9; ++j) {
                 // Print board element or empty space if the value is 0
                 if (board[i][j] == 0) {
-                    os << " ";
+                    std::cout << " ";
                 } else {
-                    os << board[i][j];
+                    std::cout << board[i][j];
                 }
-                
+
                 // Print vertical border after each cell
-                os << " | ";
+                if ((j+1) % 3 == 0 && j != 8) std::cout << " ∥ ";
+                else if (j != 8) std::cout << " | ";
             }
 
             // Print vertical border for the right side of the grid
-            os << "|";
-            if ((i + 1) % 3 == 0 && i != 8) {
-                os << "|";
-            }
-            os << std::endl;
+            std::cout << " ∥";
+            std::cout << std::endl;
 
             // Print horizontal border after every 3rd row
             if ((i + 1) % 3 == 0 && i != 8) {
-                os << "||---|---|---||---|---|---||---|---|---||" << std::endl;
+                std::cout << "  ∥---|---|---∥---|---|---∥---|---|---∥" << std::endl;
             }
+
         }
 
         // Print bottom border
-        os << "||===|===|===||===|===|===||===|===|===||" << std::endl;
+        std::cout << "  ∥===|===|===∥===|===|===∥===|===|===∥" << std::endl;
+        std::cout << "    1   2   3   4   5   6   7   8   9\n" << std::endl;
 
-        // Return the ostream object
-        return os;
+        if (row != -1) {
+            for (int i = 0; i < 9; i++) {
+                std::cout << i + 1 << ": " << possibleNum[row][column][i] << "\n";
+            }
+            std::cout << "===========================================\n\n\n" << std::endl;
+        }
     }
+
 }
+
 
